@@ -15,7 +15,9 @@ function constructEvent(req) {
 
 function constructContext({ url, env }) {
   function getTwilioClient() {
-    return twilio(env.ACCOUNT_SID, env.AUTH_TOKEN);
+    const sid = env.TWILIO_ACCOUNT_SID ? env.TWILIO_ACCOUNT_SID : env.ACCOUNT_SID;
+    const token = env.TWILIO_AUTH_TOKEN ? env.TWILIO_AUTH_TOKEN : env.AUTH_TOKEN;
+    return twilio(sid, token);
   }
   const DOMAIN_NAME = url.replace(/^https?:\/\//, '');
   return { ...env, DOMAIN_NAME, getTwilioClient };
@@ -74,6 +76,7 @@ function functionToRoute(fn, config) {
     function callback(err, responseObject) {
       debug('Function execution %s finished', req.path);
       if (err) {
+        debug('Error returned from %s', req.path, err);
         handleError(err, res);
         return;
       }
